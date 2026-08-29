@@ -1,11 +1,92 @@
 ---
-import Welcome from '../components/Welcome.astro';
-import Layout from '../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+import "../styles/global.css";
 
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+const posts = (await getCollection('blog'))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 ---
 
-<Layout>
-	<Welcome />
-</Layout>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>La Perla de Gran Valor</title>
+  </head>
+
+  <body>
+
+    <header class="site-header">
+      <div class="container header-inner">
+
+        <a class="logo" href={import.meta.env.BASE_URL}>
+          La Perla de Gran Valor
+        </a>
+
+        <nav class="nav">
+          <a href={import.meta.env.BASE_URL}>Inicio</a>
+          <a href={`${import.meta.env.BASE_URL}sobre-mi/`}>
+            Sobre mí
+          </a>
+        </nav>
+
+      </div>
+    </header>
+
+
+    <main>
+
+      <section class="hero">
+        <div class="container">
+
+          <h1>La Perla de Gran Valor</h1>
+
+          <p>
+            Reflexiones del Evangelio del día
+          </p>
+
+        </div>
+      </section>
+
+
+      <section class="posts">
+        <div class="container">
+
+          {posts.map((post) => (
+            <a
+              class="post"
+              href={`${import.meta.env.BASE_URL}blog/${post.id}/`}
+            >
+
+              <div class="post-date">
+                {post.data.date.toLocaleDateString('es-AR', {
+                  day: 'numeric',
+                  month: 'long',
+                  year: 'numeric'
+                })}
+              </div>
+
+              <div class="post-title">
+                {post.data.title}
+              </div>
+
+              <p class="post-description">
+                {post.data.description}
+              </p>
+
+            </a>
+          ))}
+
+        </div>
+      </section>
+
+    </main>
+
+
+    <footer>
+      <div class="container">
+        © 2026 Lucas Fabiani. Todos los derechos reservados.
+      </div>
+    </footer>
+
+  </body>
+</html>
