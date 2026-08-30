@@ -84,6 +84,21 @@ import "../../styles/global.css";
 
         </div>
 
+        <div class="articles-header">
+  <h2>Artículos</h2>
+
+  <button
+    type="button"
+    id="new-post"
+  >
+    + Nuevo artículo
+  </button>
+</div>
+
+<div id="articles-list">
+  <p>Cargando artículos...</p>
+</div>
+
 
         <form id="post-form">
 
@@ -203,6 +218,7 @@ Escribí aquí el artículo en Markdown..."
         loginSection.hidden = true;
         adminSection.hidden = false;
 
+        loadPosts();
       }
 
 
@@ -452,6 +468,110 @@ Escribí aquí el artículo en Markdown..."
 
         }
       );
+
+      const articlesList =
+  document.querySelector("#articles-list");
+
+const newPostButton =
+  document.querySelector("#new-post");
+
+
+async function loadPosts() {
+
+  articlesList.innerHTML =
+    "<p>Cargando artículos...</p>";
+
+  const password =
+    sessionStorage.getItem(
+      "admin_password"
+    );
+
+  try {
+
+    const response =
+      await fetch(
+        `${WORKER_URL}/posts`,
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
+
+          body: JSON.stringify({
+            password
+          })
+        }
+      );
+
+    const result =
+      await response.json();
+
+    if (!response.ok) {
+
+      articlesList.innerHTML =
+        `<p>❌ ${result.error}</p>`;
+
+      return;
+    }
+
+    const posts = result.posts;
+
+    if (!posts.length) {
+
+      articlesList.innerHTML =
+        "<p>No hay artículos todavía.</p>";
+
+      return;
+    }
+
+    articlesList.innerHTML = "";
+
+    posts.forEach((post) => {
+
+      const article =
+        document.createElement("div");
+
+      article.className =
+        "admin-post";
+
+      article.innerHTML = `
+        <div>
+          <strong>${post.slug}</strong>
+        </div>
+
+        <div class="admin-post-actions">
+
+          <button
+            type="button"
+            disabled
+          >
+            Editar
+          </button>
+
+          <button
+            type="button"
+            disabled
+          >
+            Eliminar
+          </button>
+
+        </div>
+      `;
+
+      articlesList.appendChild(article);
+
+    });
+
+  } catch (error) {
+
+    console.error(error);
+
+    articlesList.innerHTML =
+      "<p>❌ No se pudieron cargar los artículos.</p>";
+  }
+}
 
     </script>
 

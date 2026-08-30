@@ -27,6 +27,9 @@ const posts = (await getCollection('blog'))
           <a href={`${import.meta.env.BASE_URL}sobre-mi/`}>
             Sobre mí
           </a>
+          <a href={`${import.meta.env.BASE_URL}admin/`}>
+          Subir artículo
+        </a>
         </nav>
 
       </div>
@@ -83,10 +86,19 @@ const posts = (await getCollection('blog'))
 
 
     <footer>
-      <div class="container">
-        © 2026 Lucas Fabiani. Todos los derechos reservados.
-      </div>
-    </footer>
+  <div class="container">
+    <p>
+      © 2026 Lucas Fabiani. Todos los derechos reservados.
+    </p>
+
+    <a
+      href={`${import.meta.env.BASE_URL}admin/`}
+      class="admin-link"
+    >
+      Administración
+    </a>
+  </div>
+</footer>
 
   </body>
 </html>

@@ -321,3 +321,52 @@ footer {
 .admin button:hover {
   background: var(--accent-hover);
 }
+
+.admin-link {
+  display: inline-block;
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.admin-link:hover {
+  color: var(--accent);
+}
+
+.articles-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-top: 50px;
+  margin-bottom: 20px;
+}
+
+.articles-header h2 {
+  margin: 0;
+}
+
+.admin-post {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 18px;
+
+  border: 1px solid var(--border);
+  border-radius: 6px;
+
+  margin-bottom: 10px;
+
+  background: white;
+}
+
+.admin-post-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.admin-post-actions button {
+  padding: 8px 12px;
+  font-size: 0.9rem;
+}
