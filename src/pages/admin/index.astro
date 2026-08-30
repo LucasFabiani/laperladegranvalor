@@ -553,11 +553,13 @@ async function loadPosts() {
 </button>
 
           <button
-            type="button"
-            disabled
-          >
-            Eliminar
-          </button>
+  type="button"
+  class="delete-post"
+  data-slug="${post.slug}"
+  data-sha="${post.sha}"
+>
+  Eliminar
+</button>
 
         </div>
       `;
@@ -709,24 +711,132 @@ async function editPost(slug) {
   }
 }
 
+
+async function deletePost(slug, sha) {
+
+  const confirmed = confirm(
+    `¿Seguro que querés eliminar "${slug}"?\n\n` +
+    "Esta acción eliminará el archivo del repositorio."
+  );
+
+  if (!confirmed) return;
+
+
+  const password =
+    sessionStorage.getItem(
+      "admin_password"
+    );
+
+  status.textContent =
+    "Eliminando artículo...";
+
+
+  try {
+
+    const response =
+      await fetch(
+        `${WORKER_URL}/delete`,
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
+
+          body: JSON.stringify({
+            password,
+            slug,
+            sha
+          })
+        }
+      );
+
+
+    const result =
+      await response.json();
+
+
+    if (!response.ok) {
+
+      status.textContent =
+        "❌ " +
+        (
+          result.error ||
+          "No se pudo eliminar"
+        );
+
+      return;
+    }
+
+
+    status.textContent =
+      "✅ Artículo eliminado correctamente.";
+
+
+    // Si estábamos editando ese artículo,
+    // limpiamos el formulario.
+
+    if (
+      form.dataset.editingSlug === slug
+    ) {
+
+      form.reset();
+
+      delete form.dataset.editingSlug;
+      delete form.dataset.editingSha;
+    }
+
+
+    // Actualizar la lista
+
+    await loadPosts();
+
+
+  } catch (error) {
+
+    console.error(error);
+
+    status.textContent =
+      "❌ No se pudo conectar con Cloudflare.";
+  }
+}
+
 articlesList?.addEventListener(
   "click",
   (event) => {
 
-    const button =
+    const editButton =
       event.target.closest(
         ".edit-post"
       );
 
-    if (!button) return;
+    if (editButton) {
 
-    const slug =
-      button.dataset.slug;
+      editPost(
+        editButton.dataset.slug
+      );
 
-    editPost(slug);
+      return;
+    }
+
+
+    const deleteButton =
+      event.target.closest(
+        ".delete-post"
+      );
+
+    if (deleteButton) {
+
+      deletePost(
+        deleteButton.dataset.slug,
+        deleteButton.dataset.sha
+      );
+
+    }
+
   }
 );
-
     </script>
 
   </body>
