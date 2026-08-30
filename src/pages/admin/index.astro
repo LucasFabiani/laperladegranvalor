@@ -164,9 +164,9 @@ Escribí aquí el artículo en Markdown..."
           </label>
 
 
-          <button type="submit">
-            Publicar artículo
-          </button>
+          <button type="submit" id="submit-button">
+  Publicar artículo
+</button>
 
         </form>
 
@@ -359,6 +359,225 @@ const newPostButton =
           button.disabled = true;
           button.textContent =
             "Publicando...";
+
+          form?.addEventListener(
+  "submit",
+  async (event) => {
+
+    event.preventDefault();
+
+    const button =
+      document.querySelector(
+        "#submit-button"
+      );
+
+
+    const password =
+      sessionStorage.getItem(
+        "admin_password"
+      );
+
+
+    const title =
+      document.querySelector(
+        "#title"
+      ).value;
+
+    const description =
+      document.querySelector(
+        "#description"
+      ).value;
+
+    const date =
+      document.querySelector(
+        "#date"
+      ).value;
+
+    const tagsText =
+      document.querySelector(
+        "#tags"
+      ).value;
+
+    const content =
+      document.querySelector(
+        "#content"
+      ).value;
+
+
+    const tags =
+      tagsText
+        ? tagsText
+            .split(",")
+            .map(
+              tag => tag.trim()
+            )
+            .filter(Boolean)
+        : [];
+
+
+    const editingSlug =
+      form.dataset.editingSlug;
+
+    const editingSha =
+      form.dataset.editingSha;
+
+
+    const isEditing =
+      Boolean(
+        editingSlug &&
+        editingSha
+      );
+
+
+    button.disabled = true;
+
+    button.textContent =
+      isEditing
+        ? "Guardando..."
+        : "Publicando...";
+
+
+    status.textContent =
+      isEditing
+        ? "Guardando cambios..."
+        : "Publicando artículo...";
+
+
+    try {
+
+      const endpoint =
+        isEditing
+          ? `${WORKER_URL}/update`
+          : `${WORKER_URL}/publish`;
+
+
+      const body = {
+
+        password,
+
+        title,
+
+        description,
+
+        date,
+
+        tags,
+
+        content
+
+      };
+
+
+      if (isEditing) {
+
+        body.slug =
+          editingSlug;
+
+        body.sha =
+          editingSha;
+      }
+
+
+      const response =
+        await fetch(
+          endpoint,
+          {
+            method: "POST",
+
+            headers: {
+              "Content-Type":
+                "application/json"
+            },
+
+            body:
+              JSON.stringify(body)
+          }
+        );
+
+
+      const result =
+        await response.json();
+
+
+      if (!response.ok) {
+
+        status.textContent =
+          "❌ " +
+          (
+            result.error ||
+            "Error al guardar"
+          );
+
+        return;
+      }
+
+
+      status.textContent =
+        isEditing
+          ? "✅ Cambios guardados correctamente."
+          : "✅ Artículo publicado correctamente.";
+
+
+      form.reset();
+
+      delete form.dataset.editingSlug;
+      delete form.dataset.editingSha;
+
+
+      button.textContent =
+        "Publicar artículo";
+
+
+      await loadPosts();
+
+
+    } catch (error) {
+
+      console.error(error);
+
+      status.textContent =
+        "❌ No se pudo conectar con Cloudflare.";
+
+    } finally {
+
+      button.disabled = false;
+
+      if (!isEditing) {
+
+        button.textContent =
+          "Publicar artículo";
+
+      }
+
+    }
+
+  }
+);
+
+newPostButton?.addEventListener(
+  "click",
+  () => {
+
+    form.reset();
+
+    delete form.dataset.editingSlug;
+    delete form.dataset.editingSha;
+
+    document.querySelector(
+      "#submit-button"
+    ).textContent =
+      "Publicar artículo";
+
+    status.textContent =
+      "";
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
+
+  }
+);
 
           status.textContent =
             "Publicando artículo...";
