@@ -545,11 +545,12 @@ async function loadPosts() {
         <div class="admin-post-actions">
 
           <button
-            type="button"
-            disabled
-          >
-            Editar
-          </button>
+  type="button"
+  class="edit-post"
+  data-slug="${post.slug}"
+>
+  Editar
+</button>
 
           <button
             type="button"
@@ -573,6 +574,158 @@ async function loadPosts() {
       "<p>❌ No se pudieron cargar los artículos.</p>";
   }
 }
+
+async function editPost(slug) {
+
+  const password =
+    sessionStorage.getItem(
+      "admin_password"
+    );
+
+  status.textContent =
+    "Cargando artículo...";
+
+  try {
+
+    const response =
+      await fetch(
+        `${WORKER_URL}/post`,
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
+
+          body: JSON.stringify({
+            password,
+            slug
+          })
+        }
+      );
+
+    const result =
+      await response.json();
+
+    if (!response.ok) {
+
+      status.textContent =
+        "❌ " +
+        (result.error ||
+          "No se pudo cargar");
+
+      return;
+    }
+
+    const markdown =
+      result.markdown;
+
+    // Separar frontmatter y contenido
+    const match =
+      markdown.match(
+        /^---\s*([\s\S]*?)\s*---\s*([\s\S]*)$/
+      );
+
+    if (!match) {
+
+      status.textContent =
+        "❌ El artículo no tiene un formato válido.";
+
+      return;
+    }
+
+    const frontmatter =
+      match[1];
+
+    const content =
+      match[2].trim();
+
+
+    // Obtener datos del frontmatter
+    const title =
+      frontmatter.match(
+        /^title:\s*["']?(.*?)["']?\s*$/m
+      )?.[1] || "";
+
+    const description =
+      frontmatter.match(
+        /^description:\s*["']?(.*?)["']?\s*$/m
+      )?.[1] || "";
+
+    const date =
+      frontmatter.match(
+        /^date:\s*(.*?)\s*$/m
+      )?.[1] || "";
+
+    const tags =
+      [...frontmatter.matchAll(
+        /^\s*-\s*["']?(.*?)["']?\s*$/gm
+      )]
+        .map(match => match[1])
+        .join(", ");
+
+
+    // Cargar en formulario
+    document.querySelector("#title").value =
+      title;
+
+    document.querySelector("#description").value =
+      description;
+
+    document.querySelector("#date").value =
+      date;
+
+    document.querySelector("#tags").value =
+      tags;
+
+    document.querySelector("#content").value =
+      content;
+
+
+    // Guardar información para luego actualizar
+    form.dataset.editingSlug =
+      slug;
+
+    form.dataset.editingSha =
+      result.sha;
+
+
+    status.textContent =
+      `✏️ Editando: ${slug}`;
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
+
+
+  } catch (error) {
+
+    console.error(error);
+
+    status.textContent =
+      "❌ No se pudo cargar el artículo.";
+  }
+}
+
+articlesList?.addEventListener(
+  "click",
+  (event) => {
+
+    const button =
+      event.target.closest(
+        ".edit-post"
+      );
+
+    if (!button) return;
+
+    const slug =
+      button.dataset.slug;
+
+    editPost(slug);
+  }
+);
 
     </script>
 
