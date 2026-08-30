@@ -208,6 +208,12 @@ Escribí aquí el artículo en Markdown..."
       const logoutButton =
         document.querySelector("#logout");
 
+      const articlesList =
+  document.querySelector("#articles-list");
+
+const newPostButton =
+  document.querySelector("#new-post");
+
 
       // =========================
       // MOSTRAR PANEL
@@ -469,11 +475,6 @@ Escribí aquí el artículo en Markdown..."
         }
       );
 
-      const articlesList =
-  document.querySelector("#articles-list");
-
-const newPostButton =
-  document.querySelector("#new-post");
 
 
 async function loadPosts() {
